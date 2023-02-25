@@ -27,6 +27,7 @@ class SearchLocationState extends State<SearchLocation> {
             body: Column(
               children: [
 
+
                 Container(
                   height: dimension.screenHeight,
                   child: Stack(children: [
