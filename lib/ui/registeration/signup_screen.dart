@@ -13,6 +13,8 @@ import 'package:google_map/utils/small_text.dart';
 import 'package:google_map/widget/button.dart';
 import 'package:google_map/utils/toast.dart';
 
+import 'google_signin.dart';
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
 
@@ -235,7 +237,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                 image: AssetImage("assets/Google.png"))),
                       ),
                       Button(
-                        onTap: () {},
+                        onTap: () {
+                          googleLogin(context);
+                          print("done");
+                        },
                         text: "Continue with Google",
                         height: dimension.height45 * 1.1,
                         width: dimension.width30 * 7,

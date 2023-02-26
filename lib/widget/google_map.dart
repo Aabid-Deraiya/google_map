@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart' as perm;
 import 'package:google_map/ui/screens/home_screen.dart';
 import 'package:google_map/utils/dimension.dart';
+import 'package:location/location.dart';
 import 'package:google_map/widget/button.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -19,8 +18,47 @@ class SearchLocation extends StatefulWidget {
 
 class SearchLocationState extends State<SearchLocation> {
 
-  static const LatLng destination = LatLng(37.33500926, -122.03272188);
-  var search = TextEditingController();
+  LatLng _center = LatLng(45.521563, -122.677433);
+  late GoogleMapController _mapController;
+  late Location _location;
+  perm.PermissionStatus _permissionStatus = perm.PermissionStatus.denied;
+
+  @override
+  void initState() {
+    super.initState();
+    _location = Location();
+    _checkLocationPermission();
+    _getUserLocation();
+  }
+
+  void _checkLocationPermission() async {
+    var status = await perm.Permission.locationWhenInUse.status;
+    setState(() {
+      _permissionStatus = status;
+    });
+  }
+
+  void _getUserLocation() async {
+    if (_permissionStatus == PermissionStatus.granted) {
+      var locationData = await _location.getLocation();
+      setState(() {
+        _center = LatLng(locationData.latitude!, locationData.longitude!);
+      });
+      _mapController.animateCamera(CameraUpdate.newLatLng(_center));
+    } else {
+      var result = await perm.Permission.locationWhenInUse.request();
+      setState(() {
+        _permissionStatus = result;
+      });
+      if (result == PermissionStatus.granted) {
+        _getUserLocation();
+      }
+    }
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +77,13 @@ class SearchLocationState extends State<SearchLocation> {
                     height: dimension.screenHeight - dimension.height45 * 2,
                     width: dimension.screenWidth,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(target: destination),
+                      onMapCreated: _onMapCreated,
+                      initialCameraPosition: CameraPosition(
+                        target: _center,
+                        zoom: 11.0,
+                      ),
+                      myLocationEnabled: true,
+                      mapType: MapType.normal,
                     ),
                   ),
                 ),
@@ -161,25 +205,6 @@ class SearchLocationState extends State<SearchLocation> {
                         ),
                       )
                     ]),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: InkWell(
-                  onTap: (){
-
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(dimension.height20),
-                    padding: EdgeInsets.all(dimension.width10*0.3),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      border: Border.all(width: 2, color: Colors.white),
-                      borderRadius: BorderRadius.circular(dimension.height30)
-                    ),
-                    child: Icon(Icons.gps_fixed_rounded),
                   ),
                 ),
               ),
