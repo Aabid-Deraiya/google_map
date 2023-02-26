@@ -18,29 +18,9 @@ class SearchLocation extends StatefulWidget {
 }
 
 class SearchLocationState extends State<SearchLocation> {
-  static const LatLng sourceLocation =
-      LatLng(21.202805807943673, 72.80588527100238);
+
   static const LatLng destination = LatLng(37.33500926, -122.03272188);
   var search = TextEditingController();
-  late String lat;
-  late String long;
-
-
-  Future<Position> getCurrentLocation() async {
-    bool serviceEnabled=await Geolocator.isLocationServiceEnabled();
-    if(!serviceEnabled){
-      return Future.error("Location services are disabled");
-    }
-    LocationPermission permission=await Geolocator.checkPermission();
-    if(permission==LocationPermission.denied){
-      return Future.error("Location Permisssion denied");
-    }
-    if(permission==LocationPermission.deniedForever){
-      return Future.error("Location Permisssion denied");
-    }
-    return await Geolocator.getCurrentPosition();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +39,7 @@ class SearchLocationState extends State<SearchLocation> {
                     height: dimension.screenHeight - dimension.height45 * 2,
                     width: dimension.screenWidth,
                     child: GoogleMap(
-                      initialCameraPosition: CameraPosition(target: sourceLocation),
+                      initialCameraPosition: CameraPosition(target: destination),
                     ),
                   ),
                 ),
@@ -188,11 +168,8 @@ class SearchLocationState extends State<SearchLocation> {
                 top: 0,
                 right: 0,
                 child: InkWell(
-                  onTap: ()async{
-                    getCurrentLocation().then((value) => {
-                      lat='${value.latitude}',
-                      long='${value.longitude}',
-                    });
+                  onTap: (){
+
                   },
                   child: Container(
                     margin: EdgeInsets.all(dimension.height20),
